@@ -44,10 +44,22 @@
 #include "StringView.hpp"
 #include "utils.hpp"
 
+#include <numeric>
+
 //==============================================================================
-std::string day_1_a(const char * /*input_file_path*/)
+std::string day_1_a(const char * input_file_path)
 {
-    return "";
+    auto const input{ aoc::read_file(input_file_path) };
+    auto const measurements{ aoc::StringView{ input }.parse_list<int>('\n') };
+    std::vector<int> differences{};
+    assert(measurements.size() > 1);
+    differences.resize(measurements.size());
+    std::adjacent_difference(measurements.cbegin(), measurements.cend(), differences.begin(), std::minus());
+    static auto const IS_POSITIVE = [](auto const value) { return value >= 0; };
+    auto const num_positive_differences{
+        std::count_if(std::next(differences.cbegin()), differences.cend(), IS_POSITIVE)
+    };
+    return std::to_string(num_positive_differences);
 }
 
 //==============================================================================

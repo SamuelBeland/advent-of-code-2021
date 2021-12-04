@@ -1,0 +1,21 @@
+#pragma once
+
+#include <array>
+#include <functional>
+#include <string>
+
+namespace inputs {
+	// days
+	@DAYS_INPUTS@
+	// tests
+	@TESTS_INPUTS@
+}
+
+@DAYS_FUNCTIONS@
+
+struct Day {
+	char const * name;
+	std::function<std::string()> function;
+};
+
+@DAYS_DATA@

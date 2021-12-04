@@ -4,6 +4,8 @@
 
 #include <type_traits>
 
+namespace aoc
+{
 #if defined(NDEBUG)
 //==============================================================================
 /** Does a static_cast.
@@ -43,3 +45,4 @@ template<typename To, typename From>
     return result;
 }
 #endif
+} // namespace aoc

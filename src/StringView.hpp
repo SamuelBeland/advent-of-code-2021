@@ -13,6 +13,12 @@ class StringView;
 
 namespace detail
 {
+#if defined(NDEBUG)
+constexpr auto IS_DEBUG = false;
+#else
+constexpr auto IS_DEBUG = true;
+#endif
+
 //==============================================================================
 static constexpr auto FORMAT_CAPTURE_PREFIX = '{';
 
@@ -99,7 +105,7 @@ public:
         if (m_size != other.m_size) {
             return false;
         }
-        return aoc::equal(cbegin(), cend(), other.cbegin());
+        return std::equal(cbegin(), cend(), other.cbegin());
     }
 
     [[nodiscard]] constexpr bool operator!=(StringView const & other) const noexcept { return !(*this == other); }

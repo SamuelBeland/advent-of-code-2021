@@ -1,69 +1,157 @@
-//  --- Day 1: Report Repair ---
-// After saving Christmas five years in a row, you've decided to take a vacation at a nice resort on a tropical island.
-// Surely, Christmas will go on without you.
+//--- Day 1: Sonar Sweep ---
+// You're minding your own business on a ship at sea when the overboard alarm goes off! You rush to see if you can help.
+// Apparently, one of the Elves tripped and accidentally sent the sleigh keys flying into the ocean!
 //
-// The tropical island has its own currency and is entirely cash-only. The gold coins used there have a little picture
-// of a starfish; the locals just call them stars. None of the currency exchanges seem to have heard of them, but
-// somehow, you'll need to find fifty of these coins by the time you arrive so you can pay the deposit on your room.
+// Before you know it, you're inside a submarine the Elves keep ready for situations like this. It's covered in
+// Christmas lights (because of course it is), and it even has an experimental antenna that should be able to track the
+// keys if you can boost its signal strength high enough; there's a little meter that indicates the antenna's signal
+// strength by displaying 0-50 stars.
 //
-// To save your vacation, you need to get all fifty stars by December 25th.
+// Your instincts tell you that in order to save Christmas, you'll need to get all fifty stars by December 25th.
 //
 // Collect stars by solving puzzles. Two puzzles will be made available on each day in the Advent calendar; the second
 // puzzle is unlocked when you complete the first. Each puzzle grants one star. Good luck!
 //
-// Before you leave, the Elves in accounting just need you to fix your expense report (your puzzle input); apparently,
-// something isn't quite adding up.
+// As the submarine drops below the surface of the ocean, it automatically performs a sonar sweep of the nearby sea
+// floor. On a small screen, the sonar sweep report (your puzzle input) appears: each line is a measurement of the sea
+// floor depth as the sweep looks further and further away from the submarine.
 //
-// Specifically, they need you to find the two entries that sum to 2020 and then multiply those two numbers together.
+// For example, suppose you had the following report:
 //
-// For example, suppose your expense report contained the following:
+// 199
+// 200
+// 208
+// 210
+// 200
+// 207
+// 240
+// 269
+// 260
+// 263
 //
-// 1721
-// 979
-// 366
-// 299
-// 675
-// 1456
+// This report indicates that, scanning outward from the submarine, the sonar sweep found depths of 199, 200, 208, 210,
+// and so on.
 //
-// In this list, the two entries that sum to 2020 are 1721 and 299. Multiplying them together produces 1721 * 299 =
-// 514579, so the correct answer is 514579.
+// The first order of business is to figure out how quickly the depth increases, just so you know what you're dealing
+// with - you never know if the keys will get carried into deeper water by an ocean current or a fish or something.
 //
-// Of course, your expense report is much larger. Find the two entries that sum to 2020; what do you get if you multiply
-// them together?
+// To do this, count the number of times a depth measurement increases from the previous measurement. (There is no
+// measurement before the first measurement.) In the example above, the changes are as follows:
+//
+// 199 (N/A - no previous measurement)
+// 200 (increased)
+// 208 (increased)
+// 210 (increased)
+// 200 (decreased)
+// 207 (increased)
+// 240 (increased)
+// 269 (increased)
+// 260 (decreased)
+// 263 (increased)
+//
+// In this example, there are 7 measurements that are larger than the previous measurement.
+//
+// How many measurements are larger than the previous measurement?
+//
+// Your puzzle answer was 1532.
+//
+// The first half of this puzzle is complete! It provides one gold star: *
 //
 //--- Part Two ---
-// The Elves in accounting are thankful for your help; one of them even offers you a starfish coin they had left over
-// from a past vacation. They offer you a second one if you can find three numbers in your expense report that meet the
-// same criteria.
+// Considering every single measurement isn't as useful as you expected: there's just too much noise in the data.
 //
-// Using the above example again, the three entries that sum to 2020 are 979, 366, and 675. Multiplying them together
-// produces the answer, 241861950.
+// Instead, consider sums of a three-measurement sliding window. Again considering the above example:
 //
-// In your expense report, what is the product of the three entries that sum to 2020?
+// 199  A
+// 200  A B
+// 208  A B C
+// 210    B C D
+// 200  E   C D
+// 207  E F   D
+// 240  E F G
+// 269    F G H
+// 260      G H
+// 263        H
+//
+// Start by comparing the first and second three-measurement windows. The measurements in the first window are marked A
+// (199, 200, 208); their sum is 199 + 200 + 208 = 607. The second window is marked B (200, 208, 210); its sum is 618.
+// The sum of measurements in the second window is larger than the sum of the first, so this first comparison increased.
+//
+// Your goal now is to count the number of times the sum of measurements in this sliding window increases from the
+// previous sum. So, compare A with B, then compare B with C, then C with D, and so on. Stop when there aren't enough
+// measurements left to create a new three-measurement sum.
+//
+// In the above example, the sum of each three-measurement window is as follows:
+//
+// A: 607 (N/A - no previous sum)
+// B: 618 (increased)
+// C: 618 (no change)
+// D: 617 (decreased)
+// E: 647 (increased)
+// F: 716 (increased)
+// G: 769 (increased)
+// H: 792 (increased)
+//
+// In this example, there are 5 sums that are larger than the previous sum.
+//
+// Consider sums of a three-measurement sliding window. How many sums are larger than the previous sum?
 
 #include "StringView.hpp"
 #include "utils.hpp"
 
+#include <iterator>
 #include <numeric>
+
+namespace
+{
+using value_t = int;
+
+constexpr auto is_increasing = [](auto const & value) -> bool { return value > 0; };
+
+constexpr auto count_positives_adjacent_differences = [](auto const & begin, auto const & end) {
+    std::vector<int> differences{};
+    differences.resize(aoc::narrow<std::size_t>(std::distance(begin, end)));
+    std::adjacent_difference(begin, end, differences.begin(), std::minus());
+    return std::count_if(std::next(differences.cbegin()), differences.cend(), is_increasing);
+};
+
+constexpr auto read_measurements = [](char const * input_file_path) {
+    auto const input{ aoc::read_file(input_file_path) };
+    aoc::StringView const view{ input };
+    return view.parse_list<value_t>('\n');
+};
+
+constexpr auto sliding_sum = [](auto begin, auto end, std::ptrdiff_t const window_size) {
+    assert(begin + window_size < end);
+    auto running_sum{ std::reduce(begin, begin + window_size, value_t{}, std::plus()) };
+    auto to_add{ begin + window_size };
+    std::vector<value_t> result{};
+    result.push_back(running_sum);
+    while (to_add != end) {
+        running_sum -= *begin++;
+        running_sum += *to_add++;
+        result.push_back(running_sum);
+    }
+    return result;
+};
+} // namespace
 
 //==============================================================================
 std::string day_1_a(const char * input_file_path)
 {
-    auto const input{ aoc::read_file(input_file_path) };
-    auto const measurements{ aoc::StringView{ input }.parse_list<int>('\n') };
-    std::vector<int> differences{};
-    assert(measurements.size() > 1);
-    differences.resize(measurements.size());
-    std::adjacent_difference(measurements.cbegin(), measurements.cend(), differences.begin(), std::minus());
-    static auto const IS_POSITIVE = [](auto const value) { return value >= 0; };
-    auto const num_positive_differences{
-        std::count_if(std::next(differences.cbegin()), differences.cend(), IS_POSITIVE)
-    };
-    return std::to_string(num_positive_differences);
+    auto const measurements{ read_measurements(input_file_path) };
+    auto const result{ count_positives_adjacent_differences(measurements.cbegin(), measurements.cend()) };
+    return std::to_string(result);
 }
 
 //==============================================================================
-std::string day_1_b(const char * /*input_file_path*/)
+std::string day_1_b(const char * input_file_path)
 {
-    return "";
+    static constexpr std::size_t WINDOW_SIZE = 3;
+
+    auto const measurements{ read_measurements(input_file_path) };
+    auto const sums{ sliding_sum(measurements.cbegin(), measurements.cend(), WINDOW_SIZE) };
+    auto const result{ count_positives_adjacent_differences(sums.cbegin(), sums.cend()) };
+
+    return std::to_string(result);
 }

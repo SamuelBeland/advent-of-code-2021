@@ -56,8 +56,8 @@ class StringView
 public:
     //==============================================================================
     StringView() noexcept = default;
-    explicit StringView(std::string const & string) noexcept;
-    constexpr explicit StringView(char const * str) noexcept;
+    StringView(std::string const & string) noexcept;
+    constexpr StringView(char const * str) noexcept;
 
     constexpr StringView(char const * begin, char const * end) noexcept(!detail::IS_DEBUG);
 

@@ -23,7 +23,8 @@ target_sources(adventlib PRIVATE
     "src/StringView.hpp" "src/StringView.cpp"
     "src/narrow.hpp"
 
-    "src/day_1.cpp")
+    "src/day_1.cpp"
+    "src/day_2.cpp")
 
 add_executable(main)
 target_sources(main PRIVATE "src/main.cpp")

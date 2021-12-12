@@ -53,10 +53,6 @@
 //
 // How many measurements are larger than the previous measurement?
 //
-// Your puzzle answer was 1532.
-//
-// The first half of this puzzle is complete! It provides one gold star: *
-//
 //--- Part Two ---
 // Considering every single measurement isn't as useful as you expected: there's just too much noise in the data.
 //

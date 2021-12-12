@@ -69,35 +69,56 @@ struct Displacement {
         return result;
     }
 };
-struct Position_ {
+
+struct NoAim {
+};
+
+struct UseAim {
+    value_t aim;
+};
+
+template<typename Aim>
+struct Position_ : Aim {
     value_t x;
     value_t y;
 
     void apply_displacement(Displacement const & displacement) noexcept
     {
+        static constexpr auto IS_AIM = std::is_base_of_v<UseAim, Position_>;
+        auto const & value{ displacement.value };
         switch (displacement.direction) {
         case Direction::forward:
-            x += displacement.value;
+            x += value;
+            if constexpr (IS_AIM) {
+                y += aim * value;
+            }
             return;
         case Direction::down:
-            y += displacement.value;
+            if constexpr (IS_AIM) {
+                aim += value;
+                return;
+            }
+            y += value;
             return;
         case Direction::up:
-            y -= displacement.value;
+            if constexpr (IS_AIM) {
+                aim -= value;
+                return;
+            }
+            y -= value;
             return;
         }
         assert(false);
     }
 };
-} // namespace
 
-//==============================================================================
-std::string day_2_a(const char * input_file_path)
+template<typename Aim>
+std::string day_2(char const * input_file_path) noexcept(!aoc::detail::IS_DEBUG)
 {
     auto const input{ aoc::read_file(input_file_path) };
     aoc::StringView const view{ input };
     auto const displacements{ view.iterate_transform(Displacement::parse, '\n') };
-    Position_ position{};
+    Position_<Aim> position{};
     for (auto const displacement : displacements) {
         position.apply_displacement(displacement);
     }
@@ -105,8 +126,16 @@ std::string day_2_a(const char * input_file_path)
     return std::to_string(result);
 }
 
+} // namespace
+
+//==============================================================================
+std::string day_2_a(const char * input_file_path)
+{
+    return day_2<NoAim>(input_file_path);
+}
+
 //==============================================================================
 std::string day_2_b(const char * input_file_path)
 {
-    return std::to_string(0);
+    return day_2<UseAim>(input_file_path);
 }

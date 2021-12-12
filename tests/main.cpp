@@ -23,6 +23,12 @@ TEST_CASE("day_2_a")
     REQUIRE(day_2_a(inputs::DAY_2) == "2019945");
 }
 
+TEST_CASE("day_2_b")
+{
+    REQUIRE(day_2_b(inputs::TEST_2_A_1) == "900");
+    REQUIRE(day_2_b(inputs::DAY_2) == "1599311480");
+}
+
 //==============================================================================
 #ifdef NDEBUG
 TEST_CASE("Benchmarks")

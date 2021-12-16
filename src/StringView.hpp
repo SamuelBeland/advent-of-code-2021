@@ -130,7 +130,7 @@ public:
     template<typename Func>
     void iterate(Func const & func, StringView const & separator) const noexcept;
     template<typename Func, typename Separator>
-    auto iterate_transform(Func const & func, Separator const & separator) const noexcept;
+    auto split_transform(Func const & func, Separator const & separator) const noexcept;
     template<typename Separator>
     [[nodiscard]] std::vector<StringView> split(Separator const & separator) const noexcept;
 };
@@ -387,7 +387,7 @@ template<typename T, typename Separator>
 std::vector<T> StringView::parse_list_and_sort(Separator const & separator) const noexcept(!detail::IS_DEBUG)
 {
     auto result{ parse_list<T>(separator) };
-    aoc::sort(result);
+    std::ranges::sort(result);
     return result;
 }
 
@@ -421,7 +421,7 @@ void StringView::iterate(Func const & func, StringView const & separator) const 
 
 //==============================================================================
 template<typename Func, typename Separator>
-auto StringView::iterate_transform(Func const & func, Separator const & separator) const noexcept
+auto StringView::split_transform(Func const & func, Separator const & separator) const noexcept
 {
     using value_type = decltype(func(StringView{}));
     std::vector<value_type> result{};

@@ -122,19 +122,19 @@ struct Position_ : Aim {
         case Direction::forward:
             x += value;
             if constexpr (IS_AIM) {
-                y += aim * value;
+                y += Aim::aim * value;
             }
             return;
         case Direction::down:
             if constexpr (IS_AIM) {
-                aim += value;
+                Aim::aim += value;
                 return;
             }
             y += value;
             return;
         case Direction::up:
             if constexpr (IS_AIM) {
-                aim -= value;
+                Aim::aim -= value;
                 return;
             }
             y -= value;
@@ -149,7 +149,7 @@ std::string day_2(char const * input_file_path) noexcept(!aoc::detail::IS_DEBUG)
 {
     auto const input{ aoc::read_file(input_file_path) };
     aoc::StringView const view{ input };
-    auto const displacements{ view.iterate_transform(Displacement::parse, '\n') };
+    auto const displacements{ view.split_transform(Displacement::parse, '\n') };
     Position_<Aim> position{};
     for (auto const displacement : displacements) {
         position.apply_displacement(displacement);
